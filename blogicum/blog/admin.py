@@ -1,6 +1,5 @@
 from django.contrib import admin
-
-from blog.models import Location, Category, Post
+from blog.models import Location, Category, Comment, Location, Post
 
 admin.site.empty_value_display = 'Планета Земля'
 
@@ -10,6 +9,7 @@ class PostInLine(admin.StackedInline):
     extra = 0
 
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     inlines = (
         PostInLine,
@@ -25,6 +25,25 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('slug',)
 
 
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'text',
+        'post',
+        'author',
+        'created_at',
+    )
+    list_editable = (
+        'author',
+    )
+    search_fields = ('author',)
+    list_filter = (
+        'author',
+        'created_at',
+    )
+
+
+@admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     inlines = (
         PostInLine,
@@ -38,6 +57,7 @@ class LocationAdmin(admin.ModelAdmin):
     list_filter = ('is_published',)
 
 
+@admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = (
         'title',
@@ -62,8 +82,3 @@ class PostAdmin(admin.ModelAdmin):
         'location',
     )
     list_display_links = ('title',)
-
-
-admin.site.register(Location, LocationAdmin)
-admin.site.register(Category, CategoryAdmin)
-admin.site.register(Post, PostAdmin)

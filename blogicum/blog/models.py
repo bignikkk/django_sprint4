@@ -2,22 +2,10 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from core.models import IsPublishedCreatedAtModel
+from core.models import IsPublishedCreatedAtModel, CreatedAtModel
 from .constants import FIELDS_LENGTH, STR_SLICE
 
 User = get_user_model()
-
-
-class Location(IsPublishedCreatedAtModel):
-    name = models.CharField(max_length=FIELDS_LENGTH,
-                            verbose_name='Название места')
-
-    class Meta:
-        verbose_name = 'местоположение'
-        verbose_name_plural = 'Местоположения'
-
-    def __str__(self):
-        return self.name[:STR_SLICE]
 
 
 class Category(IsPublishedCreatedAtModel):
@@ -36,6 +24,18 @@ class Category(IsPublishedCreatedAtModel):
 
     def __str__(self):
         return self.title[:STR_SLICE]
+
+
+class Location(IsPublishedCreatedAtModel):
+    name = models.CharField(max_length=FIELDS_LENGTH,
+                            verbose_name='Название места')
+
+    class Meta:
+        verbose_name = 'местоположение'
+        verbose_name_plural = 'Местоположения'
+
+    def __str__(self):
+        return self.name[:STR_SLICE]
 
 
 class Post(IsPublishedCreatedAtModel):
@@ -73,24 +73,29 @@ class Post(IsPublishedCreatedAtModel):
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
         default_related_name = 'posts'
-        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.title[:STR_SLICE]
 
-    def comment_count(self):
-        return self.comments.count()
 
-
-class Comment(models.Model):
-    text = models.TextField('Текст комментария')
+class Comment(CreatedAtModel):
+    text = models.TextField(verbose_name='Текст')
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
+        verbose_name='Публикация'
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='author_comments',
+        verbose_name='Автор'
+    )
 
     class Meta:
-        ordering = ('created_at',)
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.author.username[:STR_SLICE]
