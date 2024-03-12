@@ -8,17 +8,18 @@ from .forms import PostForm
 
 class AuthorCheckMixin(UserPassesTestMixin):
     def test_func(self):
-        is_it = self.get_object()
-        return is_it.author == self.request.user
+        return self.get_object().author == self.request.user
 
 
 class PostMixin(LoginRequiredMixin, AuthorCheckMixin):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
+    pk_url_kwarg = 'post_id'
 
     def handle_no_permission(self):
-        return redirect('blog:post_detail', post_id=self.get_object().pk)
+        return redirect('blog:post_detail',
+                        post_id=self.kwargs[self.pk_url_kwarg])
 
     def get_success_url(self):
         return reverse('blog:profile',

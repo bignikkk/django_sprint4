@@ -1,5 +1,7 @@
 from django.contrib import admin
-from blog.models import Location, Category, Comment, Location, Post
+
+from .models import Location, Category, Comment, Post
+
 
 admin.site.empty_value_display = 'Планета Земля'
 

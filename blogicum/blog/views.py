@@ -5,9 +5,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
 
-from .constants import get_annotate_comments, get_filtered_posts, get_paginate
-from .forms import PostForm, CommentForm, AuthorChangeForm
-from .models import Category, Post, Comment
+from .utils import get_annotate_comments, get_filtered_posts, get_paginate
+from .forms import AuthorChangeForm, CommentForm, PostForm
+from .models import Category, Comment, Post
 from .mixins import PostMixin
 
 
@@ -19,16 +19,13 @@ def index(request):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    is_not_author = request.user != post.author
-    form = CommentForm()
-
-    if is_not_author:
+    if request.user != post.author:
         post = get_object_or_404(get_filtered_posts(Post.objects), id=post_id)
 
     context = {
         'post': post,
         'comments': post.comments.all(),
-        'form': form,
+        'form': CommentForm(),
     }
     return render(request, 'blog/detail.html', context)
 
@@ -48,22 +45,20 @@ def user_profile(request, username):
     if request.user != author:
         posts = get_filtered_posts(posts)
     page_obj = get_paginate(posts, request)
-    if not page_obj.has_other_pages():
-        message = "У данного пользователя нет публикаций."
-    else:
-        message = None
+
     return render(request, 'blog/profile.html',
-                  {'profile': author,
-                   'page_obj': page_obj, 'message': message})
+                  {'profile': author, 'page_obj': page_obj})
 
 
 @login_required
 def edit_profile(request):
-    author = request.user
-    form = AuthorChangeForm(request.POST, instance=author)
+    author = get_object_or_404(User, username=request.user)
+    if request.user != author:
+        return redirect('blog:profile', username=author)
+    form = AuthorChangeForm(request.POST or None, instance=author)
     if form.is_valid():
         form.save()
-        return redirect('blog:profile', username=request.user.username)
+        return redirect('blog:profile', username=author)
 
     return render(request, 'blog/user.html', {'form': form})
 
@@ -121,7 +116,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 class PostUpdateView(PostMixin, UpdateView):
 
     def get_success_url(self):
-        return reverse('blog:post_detail', kwargs={'post_id': self.object.pk})
+        return reverse('blog:post_detail',
+                       kwargs={'post_id': self.kwargs[self.pk_url_kwarg]})
 
 
 class PostDeleteView(PostMixin, DeleteView):

@@ -89,13 +89,13 @@ class Comment(CreatedAtModel):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_comments',
+        related_name='comments',
         verbose_name='Автор'
     )
 
-    class Meta:
+    class Meta(CreatedAtModel.Meta):
         verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.author.username[:STR_SLICE]
+        return self.text[:STR_SLICE]
