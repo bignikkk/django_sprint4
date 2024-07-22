@@ -9,6 +9,8 @@ SECRET_KEY = 'django-insecure-khrp1elk$m!hh1h*zk&9rzu@bc$1efy^ai%z^pqn9o!^@#t%pc
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'www.bignikkk.pythonanywhere.com',
+    'bignikkk.pythonanywhere.com',
     'localhost',
     '127.0.0.1',
 ]

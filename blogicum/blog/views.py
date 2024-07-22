@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
 
-from .utils import get_annotate_comments, get_filtered_posts, get_paginate
+from .services import get_annotate_comments, get_filtered_posts, get_paginate
 from .forms import AuthorChangeForm, CommentForm, PostForm
 from .models import Category, Comment, Post
 from .mixins import PostMixin
